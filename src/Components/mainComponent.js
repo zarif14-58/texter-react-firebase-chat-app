@@ -1,16 +1,56 @@
 import React, {Component} from 'react'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import Home from './homeComponent'
 import Signup from './signupComponent'
+import { auth } from '../Firebase/config'
+import User from './userComponent'
+import { Spinner } from 'reactstrap'
+
+function PrivateRoute({component: Component, authenticated, ...rest}){
+    return(
+        <Route {...rest} render={(props) => authenticated === true ? <Component {...props} /> : <Redirect to={{pathname: '/', state: {from: props.location}}} />} />
+    )
+}
+
+function PublicRoute({component: Component, authenticated, ...rest}){
+    return(
+        <Route {...rest} render={(props) => authenticated === false ? <Component {...props} /> : <Redirect to="/user" />} />
+    )
+}
 
 class Main extends Component {
+    constructor(props){
+        super(props)
+        this.state = {
+            loading: true,
+            authenticated: false
+        }
+    }
+    
+    componentDidMount(){
+        auth().onAuthStateChanged((user) => {
+            if(user){
+                this.setState({
+                    loading: false,
+                    authenticated: true
+                })
+            }
+            else{
+                this.setState({
+                    loading: false,
+                    authenticated: false
+                })
+            }
+        })
+    }
 
     render(){
-        return(
+        return this.state.loading === true ? <div className="text-center" id="spinner"><Spinner type="grow" color="primary"></Spinner></div> : (
             <Router>
                 <Switch>
-                    <Route exact path='/' component={Home} />
-                    <Route exact path="/signup" component={Signup} />
+                    <PrivateRoute path='/user' authenticated={this.state.authenticated} component={User} />
+                    <PublicRoute path="/signup" authenticated={this.state.authenticated} component={Signup} />
+                    <PublicRoute path='/' authenticated={this.state.authenticated} component={Home} />
                 </Switch>
             </Router>
         )

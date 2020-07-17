@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { Form, FormGroup, Label, Input, Button } from 'reactstrap'
 import { Link } from 'react-router-dom'
+import {signin} from '../Firebase/auth'
 
 
 class Home extends Component {
@@ -8,7 +9,8 @@ class Home extends Component {
         super(props)
         this.state = {
             email: '',
-            password: ''
+            password: '',
+            error: null
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -20,9 +22,15 @@ class Home extends Component {
         })
     }
 
-    handleSubmit(event){
+    async handleSubmit(event){
         console.log("login Form Submitted" + this.state.email + this.state.password)
         event.preventDefault()
+        this.setState({ error: '' })
+        try {
+            await signin(this.state.email, this.state.password)
+        } catch(error){
+            this.setState({ error: error.message })
+        }
     }
 
     render(){
@@ -50,6 +58,7 @@ class Home extends Component {
                                             value={this.state.password} onChange={this.handleChange}
                                         />
                                     </FormGroup>
+                                    {this.state.error ? (<p className="text-danger">{this.state.error}</p>) : null}
                                     <Button outline color="primary">Login</Button>
                                 </Form>
                             </div>
