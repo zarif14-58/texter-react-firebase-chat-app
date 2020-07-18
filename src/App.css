@@ -13,3 +13,50 @@
 #spinner{
   margin-top: 20%;
 }
+
+.active{
+  position: relative;
+	background: cyan;
+	border-radius: .4em;
+}
+
+.active::after{
+  content: '';
+	position: absolute;
+	right: 0;
+	top: 50%;
+	width: 0;
+	height: 0;
+	border: 16px solid transparent;
+	border-left-color: cyan;
+	border-right: 0;
+	border-bottom: 0;
+	margin-top: -8px;
+	margin-right: -16px;
+}
+
+.notActive{
+  position: relative;
+	background: #00ff99;
+	border-radius: .4em;
+}
+
+.notActive::after{
+  content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 0;
+	height: 0;
+	border: 16px solid transparent;
+	border-right-color: #00ff99;
+	border-left: 0;
+	border-bottom: 0;
+	margin-top: -8px;
+	margin-left: -16px;
+}
+
+.chats{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

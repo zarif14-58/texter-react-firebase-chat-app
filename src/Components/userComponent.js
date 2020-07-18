@@ -29,7 +29,7 @@ class User extends Component {
                     <Navbar color="warning" light expand="md">
                         <NavbarBrand>Texter</NavbarBrand>
                         <NavbarText className="ml-auto">{this.state.user.displayName}</NavbarText>
-                        <Button outline color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
+                        <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
                     </Navbar>
                 </div>
                 <Room />

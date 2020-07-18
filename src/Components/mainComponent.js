@@ -5,6 +5,7 @@ import Signup from './signupComponent'
 import { auth } from '../Firebase/config'
 import User from './userComponent'
 import { Spinner } from 'reactstrap'
+import Chat from './chatComponent'
 
 function PrivateRoute({component: Component, authenticated, ...rest}){
     return(
@@ -49,6 +50,7 @@ class Main extends Component {
             <Router>
                 <Switch>
                     <PrivateRoute path='/user' authenticated={this.state.authenticated} component={User} />
+                    <PrivateRoute path='/chat' authenticated={this.state.authenticated} component={Chat} />
                     <PublicRoute path="/signup" authenticated={this.state.authenticated} component={Signup} />
                     <PublicRoute path='/' authenticated={this.state.authenticated} component={Home} />
                 </Switch>
