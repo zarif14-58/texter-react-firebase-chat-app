@@ -26,7 +26,7 @@ class User extends Component {
         return(
             <React.Fragment>
                 <div>
-                    <Navbar color="warning" light expand="md">
+                    <Navbar color="warning" light expand="md" className="fixed-top">
                         <NavbarBrand>Texter</NavbarBrand>
                         <NavbarText className="ml-auto">{this.state.user.displayName}</NavbarText>
                         <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
