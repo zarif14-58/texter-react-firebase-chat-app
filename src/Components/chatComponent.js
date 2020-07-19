@@ -7,6 +7,7 @@ import { signout } from '../Firebase/auth'
 import FileUploader from "react-firebase-file-uploader"
 import 'emoji-mart/css/emoji-mart.css'
 import {Picker} from 'emoji-mart'
+import placehold from './assets/placeholder_profile_photo.png'
 
 
 class Chat extends Component {
@@ -95,7 +96,8 @@ class Chat extends Component {
                     uid: this.state.user.uid,
                     from: this.state.user.displayName,
                     text: true,
-                    imageUrl: this.state.imageUrl
+                    imageUrl: this.state.imageUrl,
+                    dp: this.state.user.photoURL
                 })
                 .then((docRef) => console.log("Document written with ID: ", docRef.id))
                 .catch((error) => console.log(error))
@@ -122,18 +124,26 @@ class Chat extends Component {
         console.log("Image URL" + this.state.imageUrl)
         let text = this.state.chats.map(i => {
             let rndr
+            let dp
             if(i.imageUrl === ""){
                 rndr = <div></div>
             }
             else{
                 rndr = <img src={i.imageUrl} alt="" className="img-fluid"/>
             }
+
+            if(i.dp === ""){
+                dp = <img src={placehold} alt="" height="25px" width="25px" style={{borderRadius: "50%"}} />
+            }
+            else{
+                dp = <img src={i.dp} alt="" height="25px" width="25px" style={{borderRadius: "50%"}} />
+            }
             return(
                 <div className="row justify-content-center chats" key={i.createdAt}>
                     <div className={"col-8 col-sm-3 " + (this.state.user.uid === i.uid ? "active" : "notActive")}>
                         <h6>{i.content}</h6>
                         {rndr}
-                        <p>--{i.from}</p>
+                        <p>--{dp} {i.from}</p>
                     </div>
                 </div>
             )
@@ -161,13 +171,13 @@ class Chat extends Component {
                                     />
                                     {this.state.emojyOpen && <Picker onSelect={this.addEmoji} style={{width: "300px", height: "auto"}} />}
                                 </FormGroup>
-                                <Button color="primary"><i class="fa fa-paper-plane" aria-hidden="true"></i></Button>
+                                <Button color="primary"><i className="fa fa-paper-plane" aria-hidden="true"></i></Button>
                             </Form>   
                         </div>
                         <div className="col-3 col-sm-3" style={{marginLeft: "-17px"}}>
                         
                             <label style={{backgroundColor: '#ff66ff', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer', marginRight: "5px"}}>
-                                <i class="fa fa-file-image-o" aria-hidden="true"></i>{this.state.isUploading && this.state.progress}
+                                <i className="fa fa-file-image-o" aria-hidden="true"></i>{this.state.isUploading && this.state.progress}
                                     <FileUploader
                                         hidden
                                         randomizeFilename
@@ -179,7 +189,7 @@ class Chat extends Component {
                                         onProgress={this.handleProgress}
                                     />
                             </label>
-                            <i class="fa fa-smile-o" aria-hidden="true" style={{color: "blue", fontSize: "20px", verticalAlign: "sub", "cursor": "pointer"}} onClick={this.handleEmojy}></i>             
+                            <i className="fa fa-smile-o" aria-hidden="true" style={{color: "blue", fontSize: "20px", verticalAlign: "sub", "cursor": "pointer"}} onClick={this.handleEmojy}></i>             
                         </div>
                     </div>
                 </div>
