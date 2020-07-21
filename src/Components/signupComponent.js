@@ -4,6 +4,7 @@ import { signup } from '../Firebase/auth'
 import FileUploader from "react-firebase-file-uploader"
 import firebase from 'firebase';
 import placehold from './assets/placeholder_profile_photo.png'
+import { db } from '../Firebase/config';
 
 class Signup extends Component {
     constructor(props){
@@ -58,7 +59,6 @@ class Signup extends Component {
         .getDownloadURL()
         .then(url => this.setState({ dp: url }))
 
-        this.setState({progress: 0})
     }
 
     async handleSubmit(event){
@@ -68,15 +68,30 @@ class Signup extends Component {
         try{
             await signup(this.state.signupemail, this.state.signuppass)
                     .then(result => {
+
                         result.user.updateProfile({
                             displayName: this.state.lastname,
                             photoURL: this.state.dp
                         })
+
+                        db.collection("Users").doc(`${result.user.uid}`).set({
+                            displayName: this.state.lastname,
+                            photoURL: this.state.dp,
+                            uid: result.user.uid
+                        }).then(() => console.log("Profile written successful"))
+                            .catch(err => console.error("Error writing doc", err))
                     })
                     .catch(err => console.log(err))
         } catch(error){
             this.setState({ error: error.message })
         }
+
+        
+
+        this.setState({
+            isUploading: false,
+            progress: 0
+        })
     }
 
     render(){
