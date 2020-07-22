@@ -28,7 +28,7 @@ class User extends Component {
         return(
             <React.Fragment>
                 <div>
-                    <Navbar color="warning" light expand="md" className="fixed">
+                    <Navbar light expand="md" className="fixed-top" style={{backgroundColor: "#33ccff"}}>
                         <NavbarBrand>Texter</NavbarBrand>
                         <NavbarText className="ml-auto"><Link to="/profile"><img src={this.state.user.photoURL === null ? placehold : this.state.user.photoURL} height="50px" width="50px" style={{borderRadius: "50%"}} alt="profilepic"/></Link>  {this.state.user.displayName}</NavbarText>
                         <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>

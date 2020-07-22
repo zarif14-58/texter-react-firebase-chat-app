@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { db } from '../Firebase/config'
-import { Form, FormGroup, Input, Button, Navbar, NavbarBrand, NavbarText } from 'reactstrap'
+import { Form, FormGroup, Input, Button, Navbar, NavbarBrand, NavbarText, Progress, Spinner } from 'reactstrap'
 import { auth } from '../Firebase/config'
 import firebase from 'firebase';
 import { signout } from '../Firebase/auth'
@@ -25,7 +25,9 @@ class Chat extends Component {
             progress: 0,
             emojyOpen: false,
             users: [],
-            metaData: null
+            metaData: null,
+            loading: true,
+            roomName: this.props.location.state.name
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -136,7 +138,7 @@ class Chat extends Component {
                 querySnapshot.forEach((doc) => {
                     user.push(doc.data())
                 })
-                this.setState({users: user})
+                this.setState({users: user, loading: false})
             })
 
         db.collection("Rooms").doc(`${this.state.rooms}`).collection("Texts").orderBy("createdAt", "asc")
@@ -215,17 +217,19 @@ class Chat extends Component {
         return(
             <React.Fragment>
                 <div>
-                    <Navbar color="warning" light expand="md" className="fixed-top">
+                    <Navbar light expand="md" className="fixed-top" style={{backgroundColor: "#33ccff"}}>
                         <NavbarBrand>Texter</NavbarBrand>
-                        <NavbarText className="ml-auto"><Link to="/profile"><img src={this.state.user.photoURL === null ? placehold : this.state.user.photoURL} height="50px" width="50px" style={{borderRadius: "50%"}} alt="profilepic"/></Link>  {this.state.user.displayName}</NavbarText>
+                        <NavbarText>@{this.state.roomName}</NavbarText>
+                        <NavbarText className="ml-auto"><Link to="/profile"><img src={this.state.user.photoURL === null ? placehold : this.state.user.photoURL} height="50px" width="50px" style={{borderRadius: "50%"}} alt="profilepic"/></Link></NavbarText>
                         <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
                     </Navbar>
                 </div>
-                <div className="container" style={{paddingTop: "80px"}}>
+                {this.state.loading && <div className="text-center" style={{paddingTop: "90px"}}><Spinner type="grow" color="info" /></div>}
+                <div className="container" style={{paddingTop: "80px", paddingBottom: "110px"}}>
                     {text}
                 </div>
-                <div className="container" style={{marginBottom: "20px"}}>
-                    <div className="row justify-content-center">
+                <div className="container fixed-bottom" style={{backgroundColor: "#40E0D0"}}>
+                    <div className="row justify-content-center" style={{marginTop: "10px" ,marginBottom: "15px"}}>
                         <div className="col-9 col-sm-4 offset-sm-2">
                             <Form onSubmit={this.handleSubmit}>
                                 <FormGroup>
@@ -235,13 +239,16 @@ class Chat extends Component {
                                     />
                                     {this.state.emojyOpen && <Picker onSelect={this.addEmoji} style={{width: "300px", height: "auto"}} />}
                                 </FormGroup>
+                                {this.state.isUploading && <div style={{marginBottom: "5px"}}>
+                                    <Progress value={this.state.isUploading && this.state.progress} />
+                                </div>}
                                 <Button color="primary"><i className="fa fa-paper-plane" aria-hidden="true"></i></Button>
                             </Form>   
                         </div>
                         <div className="col-3 col-sm-3" style={{marginLeft: "-17px"}}>
                         
                             <label style={{backgroundColor: '#ff66ff', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer', marginRight: "5px"}}>
-                            <i className="fa fa-file" aria-hidden="true"></i>{this.state.isUploading && this.state.progress}
+                            <i className="fa fa-file" aria-hidden="true"></i>
                                     <FileUploader
                                         hidden
                                         randomizeFilename

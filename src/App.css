@@ -77,5 +77,18 @@
 	margin-top: 50px;
 }
 
+#circle{
+	position: fixed;
+	right: 40px;
+	bottom: 40px;
+	color: #ff5cff;
+	font-size: 60px;
+	cursor: pointer;
+	text-shadow: 1px 1px 2px black;
+}
 
+#circle:hover{
+	text-shadow: 2px 2px 3px black;
+}
 
+ 

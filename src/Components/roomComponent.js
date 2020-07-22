@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { db } from '../Firebase/config'
-import { Button, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Card, CardTitle, CardText } from 'reactstrap'
+import { Button, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Card, CardTitle, CardText, Spinner } from 'reactstrap'
 import { Link } from 'react-router-dom'
 
 
@@ -14,12 +14,15 @@ class Room extends Component {
             about: '',
             selectedOption: "public",
             privateId : false,
-            privId: ''
+            privId: '',
+            search: '',
+            loading: true
         }
         this.toggleModal = this.toggleModal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleChange = this.handleChange.bind(this)
         this.handleOptionChange = this.handleOptionChange.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
     }
 
     toggleModal(){
@@ -34,6 +37,10 @@ class Room extends Component {
 
     handleOptionChange(event){
         this.setState({selectedOption: event.target.value})
+    }
+
+    handleSearch(event){
+        this.setState({search: event.target.value})
     }
 
     async handleSubmit(event) {
@@ -65,6 +72,8 @@ class Room extends Component {
     }
 
     async componentDidMount(){
+
+
         db.collection("Rooms").where("public", "==", true)
             .onSnapshot((querySnapshot) => {
                 let names = []
@@ -72,19 +81,28 @@ class Room extends Component {
                     names.push(doc.data())
                 })
                 this.setState({
-                    name: names
+                    name: names,
+                    loading: false
                 })
             })   
         }
 
     render(){
-        let nms = this.state.name.map(i => {
+        let search = this.state.search
+        
+        let init = this.state.name.map(i => {
+            return i
+        })
+
+        let fltrd = init.filter(el => el.roomName.toLowerCase().indexOf(search.toLowerCase()) !== -1)
+
+        let nms = fltrd.map(i => {
             return(
                 <div className="col-12 col-sm-4 roomCards" key={i.roomId}>
                     <Card body>
                         <CardTitle>{i.roomName}</CardTitle>
                         <CardText>{i.about}</CardText>
-                        <Link to={{pathname: "/chat", state:{room: i.roomId}}}><Button color="primary">Enter {i.roomName} Room</Button></Link>
+                        <Link to={{pathname: "/chat", state:{room: i.roomId, name: i.roomName}}}><Button color="primary">Enter {i.roomName} Room</Button></Link>
                     </Card>
                 </div>
             )
@@ -137,16 +155,34 @@ class Room extends Component {
                         </Form>
                     </ModalBody>
                 </Modal>
-                <div className="container">
+                <div className="container" style={{paddingTop: "80px"}}>
                     <h1 className="text-center">Rooms</h1>
+                    <div className="row justify-content-center">
+                        <div className="col-10 col-sm-6">
+                            <Form>
+                                <FormGroup>
+                                    <Input type="text" name="search"
+                                        id="search" value={this.state.search}
+                                        onChange={this.handleSearch} placeholder="Search Public Rooms By Typing"
+                                    />
+                                </FormGroup>
+                            </Form>
+                        </div>
+                    </div>
+                    <h6 className="text-center">Or,</h6>
+                    
+                    <div className="text-center" style={{marginBottom: "10px"}}>
+                        <Link to="/private"><Button color="info">Join A Private Room</Button></Link>
+                    </div>
+
+                    <hr />
+                    {this.state.loading && <div className="text-center"><Spinner type="grow" color="info" /></div>}
                     <div className="row justify-content-center"> 
                         {nms}
                     </div>
                 </div>
-                <div className="text-center">
-                    <Button><i className="fa fa-plus-circle" aria-hidden="true" onClick={this.toggleModal}></i></Button>
-                    <Button to="/private">Join Private Room</Button>
-                </div>
+                
+                <i className="fa fa-plus-circle" aria-hidden="true" onClick={this.toggleModal} id="circle"></i>
             </React.Fragment>
         )
     }
