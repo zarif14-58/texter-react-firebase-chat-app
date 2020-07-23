@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { Form, FormGroup, Label, Row, Col, Input, Button } from 'reactstrap'
+import { Form, FormGroup, Label, Row, Col, Input, Button, Progress } from 'reactstrap'
 import { signup } from '../Firebase/auth'
 import FileUploader from "react-firebase-file-uploader"
 import firebase from 'firebase';
@@ -17,7 +17,11 @@ class Signup extends Component {
             error: null,
             dp: '',
             isUploading: false,
-            progress: 0
+            progress: 0,
+            isDisabbled: true,
+            lastNameErr: null,
+            emailErr: null,
+            passwordErr: null
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -25,12 +29,39 @@ class Signup extends Component {
         this.handleUploadError = this.handleUploadError.bind(this)
         this.handleUploadStart = this.handleUploadStart.bind(this)
         this.handleUploadSuccess = this.handleUploadSuccess.bind(this)
+        this.handleDisable = this.handleDisable.bind(this)
     }
 
     handleChange(event){
         this.setState({
             [event.target.name]: event.target.value
         })
+
+        const regex = RegExp(/.+@.+\..+/)
+
+        switch(event.target.name){
+            case 'lastname':
+                event.target.value.length < 5 ? this.setState({lastNameErr: "Last Name Should Be At Least 5 Characters Long"})
+                    : this.setState({lastNameErr: ''})
+                break
+
+            case 'signupemail':
+                regex.test(event.target.value) ? this.setState({emailErr: ''}) : this.setState({emailErr: "Email Is Not Valid"})
+                break 
+
+            case 'signuppass':
+                event.target.value.length < 8 ? this.setState({passwordErr: "Password Should Be Atleast 8 Characters Long"})
+                    : this.setState({passwordErr: ''})
+                break
+
+            default:
+                break
+        }
+
+    }
+
+    handleDisable(){
+        return this.state.lastNameErr === '' && this.state.emailErr === '' && this.state.passwordErr === ''
     }
 
     handleUploadStart(){
@@ -94,7 +125,9 @@ class Signup extends Component {
         })
     }
 
+
     render(){
+        const disable = this.handleDisable()
         return(
             <div className="container" id="signupForm">
                 <div className="row justify-content-center">
@@ -119,6 +152,7 @@ class Signup extends Component {
                                             id="lastname" placeholder="Last Name" 
                                             value={this.state.lastname} onChange={this.handleChange}
                                         />
+                                        {this.state.lastNameErr !== null && <p className="text-danger">{this.state.lastNameErr}</p>}   
                                     </FormGroup>
                                 </Col>
                             </Row>
@@ -128,6 +162,7 @@ class Signup extends Component {
                                     id="signupemail" placeholder="Email" 
                                     value={this.state.signupemail} onChange={this.handleChange}
                                 />
+                                {this.state.emailErr !== null && <p className="text-danger">{this.state.emailErr}</p>}
                             </FormGroup>
                             <FormGroup>
                                 <Label for="signuppass">Password</Label>
@@ -135,11 +170,12 @@ class Signup extends Component {
                                     id="signuppass" placeholder="Password"
                                     value={this.state.signuppass} onChange={this.handleChange}
                                 />
+                                {this.state.passwordErr !== null && <p className="text-danger">{this.state.passwordErr}</p>}
                             </FormGroup>
                             <FormGroup>
                             <img src={this.state.dp === '' ? placehold : this.state.dp} alt="profile pic" height="100px" width="100px" style={{borderRadius: "50%"}} />
                             <label style={{backgroundColor: '#ff66ff', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer', marginRight: "5px"}}>
-                                Upload Profile Picture {this.state.isUploading && this.state.progress}
+                                Upload Profile Picture
                                     <FileUploader
                                         hidden
                                         randomizeFilename
@@ -151,9 +187,12 @@ class Signup extends Component {
                                         onProgress={this.handleProgress}
                                     />
                             </label>
+                            {this.state.isUploading && <div style={{marginTop: "5px"}}>
+                                <Progress value={this.state.isUploading && this.state.progress} />
+                            </div>}
                             </FormGroup>
                             {this.state.error ? (<p className="text-danger">{this.state.error}</p>) : null}
-                            <Button outline color="info">Sign Up</Button>
+                            <Button color="info" disabled={!disable}>Sign Up</Button>
                         </Form>
                     </div>
                 </div>

@@ -16,7 +16,9 @@ class Room extends Component {
             privateId : false,
             privId: '',
             search: '',
-            loading: true
+            loading: true,
+            nameError: null,
+            aboutError: null
         }
         this.toggleModal = this.toggleModal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -33,6 +35,29 @@ class Room extends Component {
 
     handleChange(event) {    
         this.setState({[event.target.name]: event.target.value});  
+
+        switch (event.target.name) {
+            case 'room':
+                event.target.value.length < 5 ? this.setState({nameError: 'Room Name Must Be At Least 5 Characters Long'})
+                    : this.setState({nameError: ''})
+                ||
+                event.target.value.length > 21 ? this.setState({nameError: 'Room Name Must Be Less Than 21 Characters'})
+                    : this.setState({nameError: ''})
+
+                break;
+
+            case 'about':
+                event.target.value.length > 150 ? this.setState({aboutError: 'Room Description Must Be Less Than 150 Characters'})
+                    : this.setState({aboutError: ''})
+                ||
+                event.target.value.length < 10 ? this.setState({aboutError: 'Room Description Must Be Greater Than 10 Characters Long'})
+                    : this.setState({aboutError: ''})
+
+                break;
+        
+            default:
+                break;
+        }
     }
 
     handleOptionChange(event){
@@ -65,7 +90,8 @@ class Room extends Component {
             roomName: this.state.room,
             about: this.state.about,
             public: type,
-            roomId: docRef.id
+            roomId: docRef.id,
+            pop: 0
         })
 
         this.setState({room: '', about: ''})
@@ -74,7 +100,7 @@ class Room extends Component {
     async componentDidMount(){
 
 
-        db.collection("Rooms").where("public", "==", true)
+        db.collection("Rooms").where("public", "==", true).orderBy("pop", "desc")
             .onSnapshot((querySnapshot) => {
                 let names = []
                 querySnapshot.forEach((doc) => {
@@ -121,6 +147,7 @@ class Room extends Component {
                                     id="room" placeholder="Type your room name"
                                     onChange={this.handleChange} value={this.state.value}
                                 />
+                                {this.state.nameError !== null && <h6 className="text-danger">{this.state.nameError}</h6>}
                             </FormGroup>
                             <FormGroup>
                                 <Label>About:</Label>
@@ -128,6 +155,7 @@ class Room extends Component {
                                     id="about" placeholder="Give a short description about the room"
                                     onChange={this.handleChange} value={this.state.value}
                                 />
+                                {this.state.aboutError !== null && <h6 className="text-danger">{this.state.aboutError}</h6>}
                             </FormGroup>
                             <FormGroup tag="fielset">
                                 <legend>Please Select Your Room Type:</legend>
@@ -150,7 +178,7 @@ class Room extends Component {
                                     </Label>
                                 </FormGroup>
                             </FormGroup>
-                            <Button outline color="success">Create Room</Button>
+                            {this.state.nameError !== null && this.state.aboutError !== null && this.state.nameError === '' && this.state.aboutError === '' && <Button outline color="success">Create Room</Button>}
                             {this.state.privateId && <h5>Here's your private room's ID: <em>{this.state.privId}</em>. Store it somewhere safe. You can join the private room by entering this ID.</h5>}
                         </Form>
                     </ModalBody>
