@@ -108,7 +108,8 @@ class Signup extends Component {
                         db.collection("Users").doc(`${result.user.uid}`).set({
                             displayName: this.state.lastname,
                             photoURL: this.state.dp,
-                            uid: result.user.uid
+                            uid: result.user.uid,
+                            favs: []
                         }).then(() => console.log("Profile written successful"))
                             .catch(err => console.error("Error writing doc", err))
                     })
@@ -116,8 +117,6 @@ class Signup extends Component {
         } catch(error){
             this.setState({ error: error.message })
         }
-
-        
 
         this.setState({
             isUploading: false,

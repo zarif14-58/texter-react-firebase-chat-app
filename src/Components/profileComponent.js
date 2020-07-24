@@ -1,9 +1,10 @@
 import React, {Component} from 'react'
 import { auth, db } from '../Firebase/config'
-import { Button, Form, FormGroup, Label, Input } from 'reactstrap'
+import { Button, Form, FormGroup, Label, Input, Card, CardTitle, CardText } from 'reactstrap'
 import firebase from 'firebase'
 import FileUploader from "react-firebase-file-uploader"
 import placehold from './assets/placeholder_profile_photo.png'
+import { Link } from 'react-router-dom'
 
 
 class Profile extends Component {
@@ -16,7 +17,9 @@ class Profile extends Component {
             isUploading: false,
             progress: 0,
             imageUrl: null,
-            value: auth().currentUser.displayName
+            value: auth().currentUser.displayName,
+            favs: [],
+            favRooms: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleEdit = this.handleEdit.bind(this)
@@ -101,7 +104,44 @@ class Profile extends Component {
 
     }
 
+    async componentDidMount(){
+
+        db.collection("Users").doc(`${this.state.user.uid}`)
+            .onSnapshot(doc => {
+                this.setState({
+                    favs: doc.data().favs
+                })
+            })
+
+            this.state.favs.forEach(i => {
+                let rooms = []
+                db.collection("Rooms").doc(`${i}`)
+                    .onSnapshot(doc => {
+                        rooms.push(doc.data())
+                    })
+                    this.setState({
+                        favRooms: rooms
+                    })
+                })
+            }
+
     render(){
+        console.log(this.state.favs)
+        let favRooms = this.state.favRooms.map(i => {
+            return(
+                <div className="col-12 col-sm-12 roomCards" key={i.roomId}>
+                    <Card body>
+                        <div className="row">
+                            <div className="col-12">
+                                <CardTitle>{i.roomName}</CardTitle>
+                            </div>
+                        </div>
+                        <CardText>{i.about}</CardText>
+                        <Link to={{pathname: "/chat", state:{room: i.roomId, name: i.roomName}}}><Button color="primary">Enter {i.roomName} Room</Button></Link>
+                    </Card>
+                </div>
+            )
+        })
         return(
             <div className="container" style={{paddingTop: "50px"}}>
                 {!this.state.edit && <div className="row justify-content-center">
@@ -154,6 +194,13 @@ class Profile extends Component {
                     {!this.state.edit && <Button color="success" onClick={this.handleEdit}>Edit</Button>}
                     {this.state.edit && <Button color="warning" onClick={this.handleEdit}>Cancel Editing</Button>}
                 </div>
+
+                {!this.state.edit && <hr />}
+
+                {!this.state.edit && 
+                <div className="row justify-content-center">
+                    {favRooms}
+                </div>}
             </div>
         )
     }

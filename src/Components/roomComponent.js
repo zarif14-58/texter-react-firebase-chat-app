@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
-import { db } from '../Firebase/config'
+import { db, auth } from '../Firebase/config'
 import { Button, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Card, CardTitle, CardText, Spinner } from 'reactstrap'
 import { Link } from 'react-router-dom'
+import firebase from 'firebase'
 
 
 class Room extends Component {
@@ -18,13 +19,21 @@ class Room extends Component {
             search: '',
             loading: true,
             nameError: null,
-            aboutError: null
+            aboutError: null,
+            poppedRoom: null,
+            user: auth().currentUser,
+            popper: [],
+            favedRoom: null,
+            fav: [],
+            againFav: []
         }
         this.toggleModal = this.toggleModal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleChange = this.handleChange.bind(this)
         this.handleOptionChange = this.handleOptionChange.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.handleOptionChange = this.handleOptionChange.bind(this)
+        this.handleFav = this.handleFav.bind(this)
     }
 
     toggleModal(){
@@ -68,6 +77,48 @@ class Room extends Component {
         this.setState({search: event.target.value})
     }
 
+    async handlePop(){
+        
+        let ref = db.collection("Rooms").doc(`${this.state.poppedRoom}`)
+        await ref.get().then((doc) => this.setState({popper: doc.data().poppers})).catch(err => console.log(err))
+
+        if(this.state.popper.includes(this.state.user.uid)){
+            db.collection("Rooms").doc(`${this.state.poppedRoom}`).update({
+                poppers: firebase.firestore.FieldValue.arrayRemove(`${this.state.user.uid}`)
+            })
+
+            const decrement = firebase.firestore.FieldValue.increment(-1)
+
+            ref.update({ pop: decrement })
+        }
+        else{
+            db.collection("Rooms").doc(`${this.state.poppedRoom}`).update({
+                poppers: firebase.firestore.FieldValue.arrayUnion(`${this.state.user.uid}`)
+            })
+
+            const increment = firebase.firestore.FieldValue.increment(1)
+
+            ref.update({ pop: increment })
+        }
+    }
+      
+    async handleFav(){
+        let ref = db.collection("Users").doc(`${this.state.user.uid}`)
+        await ref.get().then((doc) => this.setState({fav: doc.data().favs}))
+
+        if(this.state.fav.includes(this.state.favedRoom)){
+            ref.update({
+                favs: firebase.firestore.FieldValue.arrayRemove(`${this.state.favedRoom}`)
+            })
+        }
+        else{
+            ref.update({
+                favs: firebase.firestore.FieldValue.arrayUnion(`${this.state.favedRoom}`)
+            })
+        }
+        
+    }
+
     async handleSubmit(event) {
         event.preventDefault();
 
@@ -91,14 +142,14 @@ class Room extends Component {
             about: this.state.about,
             public: type,
             roomId: docRef.id,
-            pop: 0
+            pop: 0,
+            poppers: []
         })
 
         this.setState({room: '', about: ''})
     }
 
     async componentDidMount(){
-
 
         db.collection("Rooms").where("public", "==", true).orderBy("pop", "desc")
             .onSnapshot((querySnapshot) => {
@@ -110,10 +161,21 @@ class Room extends Component {
                     name: names,
                     loading: false
                 })
-            })   
+            })
+
+        db.collection("Users").doc(`${this.state.user.uid}`)
+            .onSnapshot((doc) => {
+                this.setState({
+                    againFav: doc.data().favs
+                })
+            }) 
+
         }
 
     render(){
+        console.log(this.state.poppedRoom)
+        console.log(this.state.popper)
+
         let search = this.state.search
         
         let init = this.state.name.map(i => {
@@ -123,10 +185,36 @@ class Room extends Component {
         let fltrd = init.filter(el => el.roomName.toLowerCase().indexOf(search.toLowerCase()) !== -1)
 
         let nms = fltrd.map(i => {
+            let color
+            let fav
+            if(i.poppers.includes(this.state.user.uid)){
+                color = "#ff3399"
+            }
+            else{
+                color = "#66ff99"
+            }
+
+            if(this.state.againFav.includes(i.roomId)){
+                fav = "#ff3333"
+            }
+            else{
+                fav = "#ccccff"
+            }
             return(
                 <div className="col-12 col-sm-4 roomCards" key={i.roomId}>
                     <Card body>
-                        <CardTitle>{i.roomName}</CardTitle>
+                        <div className="row">
+                            <div className="col-5">
+                                <CardTitle>{i.roomName}</CardTitle>
+                            </div>
+                            <div className="col-3">
+                                <i className="fa fa-star" aria-hidden="true" style={{fontSize: "17px", cursor: "pointer", color: `${fav}`}} onClick={() => {this.setState({favedRoom: i.roomId}, () => this.handleFav())}}></i>
+                            </div>
+                            <div className="col-4">
+                                <i className="fa fa-fire" aria-hidden="true" style={{fontSize: "20px", cursor: "pointer", color: `${color}`}} onClick={() => {this.setState({poppedRoom: i.roomId}, () => this.handlePop())}}></i>
+                                {i.pop} POPs
+                            </div>
+                        </div>
                         <CardText>{i.about}</CardText>
                         <Link to={{pathname: "/chat", state:{room: i.roomId, name: i.roomName}}}><Button color="primary">Enter {i.roomName} Room</Button></Link>
                     </Card>
@@ -157,7 +245,7 @@ class Room extends Component {
                                 />
                                 {this.state.aboutError !== null && <h6 className="text-danger">{this.state.aboutError}</h6>}
                             </FormGroup>
-                            <FormGroup tag="fielset">
+                            <FormGroup tag="fieldset">
                                 <legend>Please Select Your Room Type:</legend>
                                 <FormGroup check>
                                     <Label check>
