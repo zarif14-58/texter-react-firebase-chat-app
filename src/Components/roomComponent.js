@@ -34,6 +34,8 @@ class Room extends Component {
         this.handleSearch = this.handleSearch.bind(this)
         this.handleOptionChange = this.handleOptionChange.bind(this)
         this.handleFav = this.handleFav.bind(this)
+        this.getRooms = this.getRooms.bind(this)
+        this.getUser = this.getUser.bind(this)
     }
 
     toggleModal(){
@@ -149,9 +151,39 @@ class Room extends Component {
         this.setState({room: '', about: ''})
     }
 
+    getRooms(){
+        this.unsubsrcibe = db.collection("Rooms").where("public", "==", true).orderBy("pop", "desc")
+        .onSnapshot((querySnapshot) => {
+            let names = []
+            querySnapshot.forEach((doc) => {
+                names.push(doc.data())
+            })
+            this.setState({
+                name: names,
+                loading: false
+            })
+        })
+
+        /*db.collection("Users").doc(`${this.state.user.uid}`)
+        .onSnapshot((doc) => {
+            this.setState({
+                againFav: doc.data().favs
+            })
+        })*/
+    }
+
+    getUser(){
+        this.unsubsrcibe = db.collection("Users").doc(`${this.state.user.uid}`)
+        .onSnapshot((doc) => {
+            this.setState({
+                againFav: doc.data().favs
+            })
+        })
+    }
+
     async componentDidMount(){
 
-        db.collection("Rooms").where("public", "==", true).orderBy("pop", "desc")
+        /*db.collection("Rooms").where("public", "==", true).orderBy("pop", "desc")
             .onSnapshot((querySnapshot) => {
                 let names = []
                 querySnapshot.forEach((doc) => {
@@ -168,13 +200,16 @@ class Room extends Component {
                 this.setState({
                     againFav: doc.data().favs
                 })
-            }) 
+            })*/ 
+            this.getRooms()
+            this.getUser()
+        }
 
+        componentWillUnmount(){
+            this.unsubsrcibe()
         }
 
     render(){
-        console.log(this.state.poppedRoom)
-        console.log(this.state.popper)
 
         let search = this.state.search
         
@@ -202,7 +237,7 @@ class Room extends Component {
             }
             return(
                 <div className="col-12 col-sm-4 roomCards" key={i.roomId}>
-                    <Card body>
+                    <Card body outline color="warning">
                         <div className="row">
                             <div className="col-5">
                                 <CardTitle>{i.roomName}</CardTitle>
@@ -271,8 +306,8 @@ class Room extends Component {
                         </Form>
                     </ModalBody>
                 </Modal>
-                <div className="container" style={{paddingTop: "80px"}}>
-                    <h1 className="text-center">Rooms</h1>
+                <div className="container" style={{paddingTop: "100px"}}>
+                    
                     <div className="row justify-content-center">
                         <div className="col-10 col-sm-6">
                             <Form>

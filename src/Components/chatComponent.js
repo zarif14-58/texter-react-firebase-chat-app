@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom'
 
 
 class Chat extends Component {
+    
     constructor(props){
         super(props)
         this.state = {
@@ -37,7 +38,9 @@ class Chat extends Component {
         this.handleUploadStart = this.handleUploadStart.bind(this)
         this.addEmoji = this.addEmoji.bind(this)
         this.handleEmojy = this.handleEmojy.bind(this)
-        this.scrolltoBottom = this.scrolltoBottom.bind(this) 
+        this.scrolltoBottom = this.scrolltoBottom.bind(this)
+        this.getTexts = this.getTexts.bind(this)
+        this.getTextsAgain = this.getTextsAgain.bind(this) 
     }
 
     async signOut(){
@@ -117,7 +120,7 @@ class Chat extends Component {
                     dp: this.state.user.photoURL,
                     fileMetaData: this.state.metaData
                 })
-                .then((docRef) => console.log("Document written with ID: ", docRef.id))
+                .then((docRef) => console.log("Document is written"))
                 .catch((error) => console.log(error))
 
                 this.setState({value: ''})
@@ -130,9 +133,44 @@ class Chat extends Component {
             this.messagesEnd.scrollIntoView({behavior: "smooth"})
         }
 
+        
+        getTextsAgain(){
+            this.unsubscribeText = db.collection("Rooms").doc(`${this.state.rooms}`).collection("Texts").orderBy("createdAt", "asc")
+            .onSnapshot((querySnapshot) => {
+                let chat = []
+                querySnapshot.forEach((doc) => {
+                    chat.push(doc.data())
+                })
+                this.setState({ chats: chat })
+            })
+        }
+        
+        getTexts(){
+            this.unsubscribeUser = db.collection("Users")
+            .onSnapshot((querySnapshot) => {
+                let user = []
+                querySnapshot.forEach((doc) => {
+                    user.push(doc.data())
+                })
+                this.setState({users: user, loading: false})
+            })
+
+            /*this.unsubscribe = db.collection("Rooms").doc(`${this.state.rooms}`).collection("Texts").orderBy("createdAt", "asc")
+            .onSnapshot((querySnapshot) => {
+                let chat = []
+                querySnapshot.forEach((doc) => {
+                    chat.push(doc.data())
+                })
+                this.setState({ chats: chat })
+            })*/
+        }
+
+        
+
     async componentDidMount(){
+        
         /**/
-        db.collection("Users")
+        /*db.collection("Users")
             .onSnapshot((querySnapshot) => {
                 let user = []
                 querySnapshot.forEach((doc) => {
@@ -148,13 +186,18 @@ class Chat extends Component {
                     chat.push(doc.data())
                 })
                 this.setState({ chats: chat })
-            })
-            
+            })*/
+            this.getTexts()
+            this.getTextsAgain()
         }
 
         componentDidUpdate(){
-
             this.scrolltoBottom()
+        }
+
+        componentWillUnmount(){
+            this.unsubscribeText()
+            this.unsubscribeUser()
         }
 
     render(){

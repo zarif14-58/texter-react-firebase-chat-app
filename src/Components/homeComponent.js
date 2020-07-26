@@ -36,9 +36,14 @@ class Home extends Component {
     render(){
         return(
             <React.Fragment>
-                <h1 className="text-center display-1">Welcome to Texter</h1>
-                <p className="lead text-center">A great place to share your thoughts</p>
-
+                <div className="container">
+                    <div className="row justify-content-center">
+                        <div className="col-12 col-sm-8">
+                            <h1 className="text-center display-3">Welcome to Texter</h1>
+                        </div>
+                    </div>
+                    <p className="lead text-center">Instantly Connect With Others</p>
+                </div>
                 <div className="container" id="loginForm">
                     
                     <div className="row justify-content-center">

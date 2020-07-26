@@ -19,3 +19,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+#root{
+  font-family: 'Nunito', sans-serif;
+}
+
+/*@font-face{
+  font-family: 'Lato', sans-serif;
+  src: local('Lato'), url(../src/fonts/Lato-Regular.ttf) format('truetype')
+}*/
