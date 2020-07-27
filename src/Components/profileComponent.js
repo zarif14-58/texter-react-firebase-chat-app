@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { auth, db } from '../Firebase/config'
-import { Button, Form, FormGroup, Label, Input } from 'reactstrap'
+import { Button, Form, FormGroup, Label, Input, Progress } from 'reactstrap'
 import firebase from 'firebase'
 import FileUploader from "react-firebase-file-uploader"
 import placehold from './assets/placeholder_profile_photo.png'
@@ -123,7 +123,10 @@ class Profile extends Component {
                                 <FormGroup>
                                     <div className="text-center">
                                         <label style={{backgroundColor: '#ff66ff', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer', marginRight: "5px"}}>
-                                            Change Avatar {this.state.isUploading && this.state.progress}
+                                            Change Avatar
+                                            {this.state.isUploading && <div style={{marginTop: "5px"}}>
+                                                    <Progress value={this.state.isUploading && this.state.progress} />
+                                                </div>}
                                                 <FileUploader
                                                     hidden
                                                     randomizeFilename

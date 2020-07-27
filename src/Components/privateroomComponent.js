@@ -10,7 +10,8 @@ class Private extends Component {
         this.state = {
             value: '',
             error: null,
-            roomId: []
+            roomId: [],
+            roomName: ''
         }
         this.handleChange = this.handleChange.bind(this)
     }
@@ -21,8 +22,8 @@ class Private extends Component {
         })
         
         this.state.roomId.forEach(i => {
-            if(i === event.target.value){
-                this.setState({error: false})
+            if(i.roomId === event.target.value){
+                this.setState({error: false, roomName: i.roomName})
             }
             else{
                 this.setState({error: true})
@@ -32,16 +33,20 @@ class Private extends Component {
 
 
     componentDidMount(){
-        db.collection("Rooms").where("public", "==", false)
+        this.unsubscribe = db.collection("Rooms").where("public", "==", false)
             .onSnapshot(querysnapshot => {
                 let id = []
                 querysnapshot.forEach(doc => {
-                    id.push(doc.data().roomId)
+                    id.push(doc.data())
                 })
                 this.setState({roomId: id})
             })    
             
         }
+
+    componentWillUnmount(){
+        this.unsubscribe()
+    }    
     
 
     render(){
@@ -53,10 +58,10 @@ class Private extends Component {
                             <FormGroup>
                                 <Label for="private">Enter Your Private Room's ID</Label>
                                 <Input type="text" name="private" id="private" onChange={this.handleChange} value={this.state.value} />
-                                {this.state.error && <h6 className="text-danger">No Room Found With This ID</h6>}
+                                {this.state.error && <h6 className="text-danger">No Private Room Found With This ID</h6>}
                             </FormGroup>
                         </Form>
-                        {this.state.error !== null && !this.state.error && <Link to={{pathname: "/chat", state:{room: this.state.value}}}><Button outline color="success">Join</Button></Link>}
+                        {this.state.error !== null && !this.state.error && <Link to={{pathname: "/chat", state:{room: this.state.value, name: this.state.roomName}}}><Button outline color="success">Join</Button></Link>}
                     </div>
                 </div>
             </div>

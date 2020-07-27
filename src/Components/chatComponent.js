@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { db } from '../Firebase/config'
-import { Form, FormGroup, Input, Button, Navbar, NavbarBrand, NavbarText, Progress, Spinner } from 'reactstrap'
+import { Form, FormGroup, Input, Button, Navbar, NavbarText, Progress, Spinner } from 'reactstrap'
 import { auth } from '../Firebase/config'
 import firebase from 'firebase';
 import { signout } from '../Firebase/auth'
@@ -261,14 +261,13 @@ class Chat extends Component {
             <React.Fragment>
                 <div>
                     <Navbar light expand="md" className="fixed-top" style={{backgroundColor: "#33ccff"}}>
-                        <NavbarBrand>Texter</NavbarBrand>
                         <NavbarText>@{this.state.roomName}</NavbarText>
                         <NavbarText className="ml-auto"><Link to="/profile"><img src={this.state.user.photoURL === null ? placehold : this.state.user.photoURL} height="50px" width="50px" style={{borderRadius: "50%"}} alt="profilepic"/></Link></NavbarText>
                         <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
                     </Navbar>
                 </div>
                 {this.state.loading && <div className="text-center" style={{paddingTop: "90px"}}><Spinner type="grow" color="info" /></div>}
-                <div className="container" style={{paddingTop: "80px", paddingBottom: "110px"}}>
+                <div className="container" style={{paddingTop: "110px", paddingBottom: "110px"}}>
                     {text}
                 </div>
                 <div className="container fixed-bottom" style={{backgroundColor: "#40E0D0"}}>

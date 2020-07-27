@@ -28,7 +28,7 @@ class Favorite extends Component {
     }
 
     async componentDidMount(){
-
+        this._ismounted = true
         /*db.collection("Users").doc(`${this.state.user.uid}`)
             .onSnapshot(doc => {
                 this.setState({
@@ -55,11 +55,19 @@ class Favorite extends Component {
         
     }
     
-    /*componentWillUnmount(){
-        this.unsubscribe()
-    }*/
+    componentWillUnmount(){
+        this._ismounted = false
+    }
 
     render(){
+        let msg
+
+        if(this.state.favs.length === 0){
+            msg = <h5 className="text-center"><em>Sorry, You Haven't Add Any Favourite Room Yet. To Add A Favorite Room, Tap The Star Icon On The Room Cards</em></h5>
+        }
+        else{
+            msg = <div></div>
+        }
         let favRooms = this.state.favRooms.map(i => {
             return(
                 <div className="col-12 col-sm-12 roomCards" key={i.roomId}>
@@ -81,14 +89,14 @@ class Favorite extends Component {
                     <div className="col-12 col-sm-6">
                         <div className="row justify-content-center">
                             <h5>Favorite Rooms</h5>
-                            
+                            {msg}
                             {favRooms}
                         </div>
                     </div>
                 </div>
                 
                 <div className="text-center">
-                    {this.state.loading && <Spinner type="grow" color="info" />}
+                    {this.state.favs.length !== 0 && this.state.loading && <Spinner type="grow" color="info" />}
                 </div> 
             </React.Fragment>
         )

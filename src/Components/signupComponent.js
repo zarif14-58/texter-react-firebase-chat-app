@@ -7,6 +7,7 @@ import placehold from './assets/placeholder_profile_photo.png'
 import { db } from '../Firebase/config';
 
 class Signup extends Component {
+    
     constructor(props){
         super(props)
         this.state = {
@@ -110,7 +111,9 @@ class Signup extends Component {
                             photoURL: this.state.dp,
                             uid: result.user.uid,
                             favs: []
-                        }).then(() => console.log("Profile written successful"))
+                        }).then(() => {
+                            console.log("Profile written successful")
+                        })
                             .catch(err => console.error("Error writing doc", err))
                     })
                     .catch(err => console.log(err))
@@ -123,7 +126,6 @@ class Signup extends Component {
             progress: 0
         })
     }
-
 
     render(){
         const disable = this.handleDisable()

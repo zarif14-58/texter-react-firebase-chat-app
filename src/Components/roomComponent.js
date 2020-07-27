@@ -152,7 +152,7 @@ class Room extends Component {
     }
 
     getRooms(){
-        this.unsubsrcibe = db.collection("Rooms").where("public", "==", true).orderBy("pop", "desc")
+        this.unsubsrcibeRoom = db.collection("Rooms").where("public", "==", true).orderBy("pop", "desc")
         .onSnapshot((querySnapshot) => {
             let names = []
             querySnapshot.forEach((doc) => {
@@ -173,7 +173,7 @@ class Room extends Component {
     }
 
     getUser(){
-        this.unsubsrcibe = db.collection("Users").doc(`${this.state.user.uid}`)
+        this.unsubsrcibeUser = db.collection("Users").doc(`${this.state.user.uid}`)
         .onSnapshot((doc) => {
             this.setState({
                 againFav: doc.data().favs
@@ -201,12 +201,14 @@ class Room extends Component {
                     againFav: doc.data().favs
                 })
             })*/ 
-            this.getRooms()
+
             this.getUser()
+            this.getRooms()
         }
 
         componentWillUnmount(){
-            this.unsubsrcibe()
+            this.unsubsrcibeRoom()
+            this.unsubsrcibeUser()
         }
 
     render(){
