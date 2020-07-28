@@ -22,9 +22,9 @@ class Private extends Component {
         this.setState({
             value: event.target.value
         })
-
+        
         this.state.roomId.forEach(i => {
-            if(i.roomId.includes(event.target.value)){
+            if(i.roomId === event.target.value){
                 this.setState({error: false}) 
                 this.setState({roomName: i.roomName})
                 this.setState({privID: i.roomId})
@@ -33,9 +33,7 @@ class Private extends Component {
                 this.setState({error: true})
             }
         })
-        
     }
-
 
     async componentDidMount(){
         this.unsubscribe = db.collection("Rooms").where("public", "==", false)
@@ -66,7 +64,7 @@ class Private extends Component {
                                 {this.state.privID !== this.state.value && <h6 className="text-danger">No Private Room Found With This ID</h6>}
                             </FormGroup>
                         </Form>
-                        {this.state.roomName !== '' && <Link to={{pathname: "/chat", state:{room: this.state.value, name: this.state.roomName}}}><Button outline color="success">Join</Button></Link>}
+                        {this.state.privID !== '' && <Link to={{pathname: "/chat", state:{room: this.state.privID, name: this.state.roomName}}}><Button outline color="success">Join</Button></Link>}
                     </div>
                 </div>
             </div>
