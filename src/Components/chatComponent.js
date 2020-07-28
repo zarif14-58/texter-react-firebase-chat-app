@@ -240,7 +240,7 @@ class Chat extends Component {
                 
             }
 
-            if(photoURL === null){
+            if(photoURL === null || photoURL === ''){
                 dp = <img src={placehold} alt="" height="25px" width="25px" style={{borderRadius: "50%"}} />
             }
             else{
