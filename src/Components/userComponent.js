@@ -44,7 +44,7 @@ class User extends Component {
             <React.Fragment>
                 <div>
                     <Navbar light expand="md" className="fixed-top" style={{backgroundColor: "#33ccff"}}>
-                        <NavbarBrand><img src={logo} alt="logo" width="96px" height="48px" ></img></NavbarBrand>
+                        <NavbarBrand><img src={logo} alt="logo" width="96px" height="48px" className="logo" ></img></NavbarBrand>
                         <NavbarText className="ml-auto"><Link to="/profile"><img src={this.state.photo === '' || this.state.photo === null ? placehold : this.state.photo} height="50px" width="50px" style={{borderRadius: "50%"}} alt="profilepic"/></Link>  {this.state.displayName}</NavbarText>
                         <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
                     </Navbar>
