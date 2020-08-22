@@ -3,6 +3,8 @@ import { db, auth } from '../Firebase/config'
 import { Button, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Card, CardTitle, CardText, Spinner } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import firebase from 'firebase'
+import Admin from './adminSearchComponent'
+import Notifi from './notificationComponent'
 
 
 class Room extends Component {
@@ -25,7 +27,16 @@ class Room extends Component {
             popper: [],
             favedRoom: null,
             fav: [],
-            againFav: []
+            againFav: [],
+            isEditModal: false,
+            edibleRoom: '',
+            edibleRoomName: '',
+            edibleRoomAbout: '',
+            editRoom: '',
+            editAbout: '',
+            editNameErr: null,
+            editAboutErr: null,
+            isSettingsOpen: false
         }
         this.toggleModal = this.toggleModal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -36,11 +47,28 @@ class Room extends Component {
         this.handleFav = this.handleFav.bind(this)
         this.getRooms = this.getRooms.bind(this)
         this.getUser = this.getUser.bind(this)
+        this.toggleEditModal = this.toggleEditModal.bind(this)
+        this.handleEdit = this.handleEdit.bind(this)
+        this.handleEditAbout = this.handleEditAbout.bind(this)
+        this.handleSubmitEdit = this.handleSubmitEdit.bind(this)        
+        this.toggleSettingsModal = this.toggleSettingsModal.bind(this)
     }
 
     toggleModal(){
         this.setState({
             isModalOpen: !this.state.isModalOpen
+        })
+    }
+
+    toggleEditModal(){
+        this.setState({
+            isEditModal: !this.state.isEditModal
+        })
+    }
+
+    toggleSettingsModal(){
+        this.setState({
+            isSettingsOpen: !this.state.isSettingsOpen
         })
     }
 
@@ -77,6 +105,50 @@ class Room extends Component {
 
     handleSearch(event){
         this.setState({search: event.target.value})
+    }
+
+    handleEdit(event){
+        //this.setState({[event.target.name]: event.target.value})
+        this.setState({editRoom: event.target.value})
+
+        /*switch (event.target.name) {
+            case 'editRoom':
+                event.target.value.length < 5 ? this.setState({nameError: 'Room Name Must Be At Least 5 Characters Long'})
+                    : this.setState({nameError: ''})
+                ||
+                event.target.value.length > 21 ? this.setState({nameError: 'Room Name Must Be Less Than 21 Characters'})
+                    : this.setState({nameError: ''})
+
+                break;
+
+            case 'editAbout':
+                event.target.value.length > 150 ? this.setState({aboutError: 'Room Description Must Be Less Than 150 Characters'})
+                    : this.setState({aboutError: ''})
+                ||
+                event.target.value.length < 10 ? this.setState({aboutError: 'Room Description Must Be Greater Than 10 Characters Long'})
+                    : this.setState({aboutError: ''})
+
+                break;
+        
+            default:
+                break;
+        }*/
+
+        event.target.value.length < 5 ? this.setState({editNameErr: 'Room Name Must Be At Least 5 Characters Long'})
+            : this.setState({editNameErr: ''})
+        ||
+        event.target.value.length > 21 ? this.setState({editNameErr: 'Room Name Must Be Less Than 21 Characters'})
+            : this.setState({editNameErr: ''})
+    }
+
+    handleEditAbout(event){
+        this.setState({editAbout: event.target.value})
+
+        event.target.value.length > 150 ? this.setState({editAboutErr: 'Room Description Must Be Less Than 150 Characters'})
+            : this.setState({editAboutErr: ''})
+        ||
+        event.target.value.length < 10 ? this.setState({editAboutErr: 'Room Description Must Be Greater Than 10 Characters Long'})
+            : this.setState({editAboutErr: ''})
     }
 
     async handlePop(){
@@ -145,10 +217,24 @@ class Room extends Component {
             public: type,
             roomId: docRef.id,
             pop: 0,
-            poppers: []
+            poppers: [],
+            admin: [`${this.state.user.uid}`]
         })
 
         this.setState({room: '', about: ''})
+    }
+
+    async handleSubmitEdit(event){
+        event.preventDefault()
+
+        let editRef = db.collection("Rooms").doc(`${this.state.edibleRoom}`)
+
+        return editRef.update({
+            roomName: `${this.state.editRoom}`,
+            about: `${this.state.editAbout}`
+        })
+        .then(() => console.log("Room Successfully updated"))
+        .catch((err) => console.error("Error updating document: ", err))
     }
 
     getRooms(){
@@ -222,8 +308,20 @@ class Room extends Component {
         let fltrd = init.filter(el => el.roomName.toLowerCase().indexOf(search.toLowerCase()) !== -1)
 
         let nms = fltrd.map(i => {
+            //console.log(this.state.user.uid)
             let color
             let fav
+            let isAdmin
+            let settings
+            if(i.admin.includes(this.state.user.uid)){
+                isAdmin = <i className="fa fa-pencil-square" aria-hidden="true" style={{fontSize: "20px", cursor: "pointer", color: "#4da6ff"}} onClick={() => {this.setState({edibleRoom: i.roomId, edibleRoomName: i.roomName, edibleRoomAbout: i.about, editRoom: i.roomName, editAbout: i.about}, () => this.toggleEditModal())}}></i>
+                settings = <i className="fa fa-cog" aria-hidden="true" style={{fontSize: "20px", cursor: "pointer", color: "#33cc00"}} onClick={() => {this.setState({edibleRoom: i.roomId, edibleRoomName: i.roomName, edibleRoomAbout: i.about}, () => this.toggleSettingsModal())}}></i>
+            }
+            else{
+                isAdmin = <div></div>
+                settings = <div></div>
+            }
+
             if(i.poppers.includes(this.state.user.uid)){
                 color = "#ff3399"
             }
@@ -253,7 +351,17 @@ class Room extends Component {
                             </div>
                         </div>
                         <CardText>{i.about}</CardText>
-                        <Link to={{pathname: "/chat", state:{room: i.roomId, name: i.roomName}}}><Button color="primary">Enter {i.roomName} Room</Button></Link>
+                        <div className="row">
+                            <div className="col-9">
+                               <Link to={{pathname: "/chat", state:{room: i.roomId, name: i.roomName}}}><Button color="primary">Enter</Button></Link> 
+                            </div>
+                            <div className="col-1">
+                                {isAdmin}
+                            </div>
+                            <div className="col-1">
+                                {settings}
+                            </div>
+                        </div>
                     </Card>
                 </div>
             )
@@ -308,6 +416,38 @@ class Room extends Component {
                         </Form>
                     </ModalBody>
                 </Modal>
+                
+                <Modal isOpen={this.state.isEditModal} toggle={this.toggleEditModal}>
+                    <ModalHeader toggle={this.toggleEditModal}>
+                        Edit {this.state.edibleRoomName}
+                    </ModalHeader>
+                    <ModalBody>
+                        <Form onSubmit={this.handleSubmitEdit}>
+                            <FormGroup>
+                                <Label>Room Name:</Label>
+                                <Input type="text" name="editRoom" 
+                                    id="editRoom" placeholder={this.state.edibleRoomName}
+                                    onChange={this.handleEdit} value={this.state.editRoom}
+                                />
+                                {this.state.editNameErr !== null && <h6 className="text-danger">{this.state.editNameErr}</h6>}
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Room About:</Label>
+                                <Input type="text" name="editAbout" 
+                                    id="editAbout" placeholder={this.state.edibleRoomAbout}
+                                    onChange={this.handleEditAbout} value={this.state.editAbout}
+                                />
+                                {this.state.editAboutErr !== null && <h6 className="text-danger">{this.state.editAboutErr}</h6>}
+                            </FormGroup>
+                            {(this.state.editNameErr === '' || this.state.editAboutErr === '') && <Button outline color="success">Save Edit</Button>}
+                        </Form>
+                    </ModalBody>
+                </Modal>
+
+                {this.state.edibleRoom !== '' && <Admin edibleRoom={this.state.edibleRoom} edibleRoomName={this.state.edibleRoomName} toggleSettingsModal={this.toggleSettingsModal} isSettingsOpen={this.state.isSettingsOpen} />}
+
+                <Notifi toggleNotiModal={this.props.toggleNotiModal} isNotiOpen={this.props.isNotiOpen} />
+
                 <div className="container" style={{paddingTop: "100px"}}>
                     
                     <div className="row justify-content-center">

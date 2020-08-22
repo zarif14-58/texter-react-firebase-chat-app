@@ -10,7 +10,6 @@ import {Picker} from 'emoji-mart'
 import placehold from './assets/placeholder_profile_photo.png'
 import { Link } from 'react-router-dom'
 
-
 class Chat extends Component {
     
     constructor(props){
@@ -40,7 +39,8 @@ class Chat extends Component {
         this.handleEmojy = this.handleEmojy.bind(this)
         this.scrolltoBottom = this.scrolltoBottom.bind(this)
         this.getTexts = this.getTexts.bind(this)
-        this.getTextsAgain = this.getTextsAgain.bind(this) 
+        this.getTextsAgain = this.getTextsAgain.bind(this)
+        //this.handleImgUpload = this.handleImgUpload.bind(this) 
     }
 
     async signOut(){
@@ -89,7 +89,7 @@ class Chat extends Component {
         })
 
     }
-
+    
     handleChange(event){
         this.setState({
             value: event.target.value
@@ -263,7 +263,7 @@ class Chat extends Component {
                     <Navbar light expand="md" className="fixed-top" style={{backgroundColor: "#33ccff"}}>
                         <NavbarText>@{this.state.roomName}</NavbarText>
                         <NavbarText className="ml-auto"><Link to="/profile"><img src={this.state.user.photoURL === null ? placehold : this.state.user.photoURL} height="50px" width="50px" style={{borderRadius: "50%"}} alt="profilepic"/></Link></NavbarText>
-                        <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
+                        <Button color="danger" className="ml-auto" size="sm" onClick={this.signOut}>Sign Out</Button>
                     </Navbar>
                 </div>
                 {this.state.loading && <div className="text-center" style={{paddingTop: "90px"}}><Spinner type="grow" color="info" /></div>}
@@ -300,6 +300,7 @@ class Chat extends Component {
                                         onUploadError={this.handleUploadError}
                                         onUploadSuccess={this.handleUploadSuccess}
                                         onProgress={this.handleProgress}
+                                        //onChange={(event) => this.handleImgUpload(event)}
                                     />
                             </label>
 

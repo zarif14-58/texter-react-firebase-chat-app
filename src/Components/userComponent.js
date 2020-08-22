@@ -14,9 +14,11 @@ class User extends Component {
         this.state = {
             user: auth().currentUser,
             photo: null,
-            displayName: ''
+            displayName: '',
+            isNotiOpen: false
         }
         this.signOut = this.signOut.bind(this)
+        this.toggleNotiModal = this.toggleNotiModal.bind(this)
     }
 
     async signOut(){
@@ -25,6 +27,12 @@ class User extends Component {
         } catch(error){
             console.log(error.message)
         }
+    }
+
+    toggleNotiModal(){
+        this.setState({
+            isNotiOpen: !this.state.isNotiOpen
+        })
     }
 
     async componentDidMount(){
@@ -46,10 +54,13 @@ class User extends Component {
                     <Navbar light expand="md" className="fixed-top" style={{backgroundColor: "#33ccff"}}>
                         <NavbarBrand><img src={logo} alt="logo" width="96px" height="48px" className="logo" ></img></NavbarBrand>
                         <NavbarText className="ml-auto"><Link to="/profile"><img src={this.state.photo === '' || this.state.photo === null ? placehold : this.state.photo} height="50px" width="50px" style={{borderRadius: "50%"}} alt="profilepic"/></Link>  {this.state.displayName}</NavbarText>
-                        <Button color="danger" className="ml-auto" onClick={this.signOut}>Sign Out</Button>
+                        <div className="ml-auto">
+                            <i className="fa fa-bell" aria-hidden="true" style={{marginRight: "15px", fontSize: "20px", color: "#1a53ff", textShadow: "1px 1px 2px black", cursor: "pointer"}} onClick={this.toggleNotiModal}></i>
+                            <Button color="danger" size="sm" onClick={this.signOut}>Sign Out</Button> 
+                        </div>
                     </Navbar>
                 </div>
-                <Room />
+                <Room toggleNotiModal={this.toggleNotiModal} isNotiOpen={this.state.isNotiOpen} />
             </React.Fragment>
         )
     }
